@@ -95,6 +95,34 @@ export class GitHubAPI {
     })
   }
 
+  async addLabelsToIssue(issueNumber, labels) {
+    return this.request(`/repos/${this.owner}/${this.repo}/issues/${issueNumber}/labels`, {
+      method: 'POST',
+      body: JSON.stringify({
+        labels
+      })
+    })
+  }
+
+  async removeLabelsFromIssue(issueNumber, labels) {
+    // GitHub API requires removing labels one by one
+    const promises = labels.map(label => 
+      this.request(`/repos/${this.owner}/${this.repo}/issues/${issueNumber}/labels/${encodeURIComponent(label)}`, {
+        method: 'DELETE'
+      })
+    )
+    return Promise.all(promises)
+  }
+
+  async setIssueLabels(issueNumber, labels) {
+    return this.request(`/repos/${this.owner}/${this.repo}/issues/${issueNumber}/labels`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        labels
+      })
+    })
+  }
+
   async ensurePriorityLabels() {
     try {
       const labels = await this.getLabels()

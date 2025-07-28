@@ -1,12 +1,36 @@
 export class TodoManager {
   constructor(githubAPI) {
     this.github = githubAPI
+    this.availableLabels = []
     this.init()
   }
 
   async init() {
     // Ensure priority labels exist
     await this.github.ensurePriorityLabels()
+    // Load all available labels
+    await this.loadLabels()
+  }
+
+  async loadLabels() {
+    try {
+      this.availableLabels = await this.github.getLabels()
+    } catch (error) {
+      console.warn('Could not load labels:', error.message)
+      this.availableLabels = []
+    }
+  }
+
+  getAvailableLabels() {
+    return this.availableLabels
+  }
+
+  getNonPriorityLabels() {
+    return this.availableLabels.filter(label => 
+      !label.name.toLowerCase().startsWith('priority:') && 
+      !label.name.toLowerCase().includes('todo') &&
+      !label.name.toLowerCase().includes('deleted')
+    )
   }
 
   async getTodos() {
@@ -16,8 +40,8 @@ export class TodoManager {
     return issues.filter(issue => !issue.pull_request)
   }
 
-  async createTodo(title, description = '', priority = 'low') {
-    const labels = [`priority: ${priority}`, 'todo']
+  async createTodo(title, description = '', priority = 'low', additionalLabels = []) {
+    const labels = [`priority: ${priority}`, 'todo', ...additionalLabels]
     
     const body = description || 'Todo created via Todo Work app'
     
@@ -48,6 +72,20 @@ export class TodoManager {
 
   async updateTodo(todoId, updates) {
     return this.github.updateIssue(todoId, updates)
+  }
+
+  async addLabelsToTodo(todoId, labels) {
+    await this.github.addLabelsToIssue(todoId, labels)
+    // Refresh available labels in case new ones were added
+    await this.loadLabels()
+  }
+
+  async removeLabelsFromTodo(todoId, labels) {
+    return this.github.removeLabelsFromIssue(todoId, labels)
+  }
+
+  async setTodoLabels(todoId, labels) {
+    return this.github.setIssueLabels(todoId, labels)
   }
 
   formatTodoForDisplay(issue) {
