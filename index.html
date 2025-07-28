@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo Work - GitHub Issues Manager</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="header">
+        <h1>🚀 Todo Work</h1>
+        <p>Manage your work todos with GitHub Issues</p>
+      </header>
+      
+      <main class="main">
+        <div class="github-config">
+          <h2>GitHub Configuration</h2>
+          <div class="config-form">
+            <input type="text" id="github-token" placeholder="GitHub Personal Access Token" />
+            <input type="text" id="repo-owner" placeholder="Repository Owner" value="justinmdougherty" />
+            <input type="text" id="repo-name" placeholder="Repository Name" value="todo_work" />
+            <button id="connect-btn">Connect to GitHub</button>
+          </div>
+          <div id="connection-status" class="status"></div>
+        </div>
+
+        <div class="todo-section" id="todo-section" style="display: none;">
+          <div class="add-todo">
+            <h2>Add New Todo</h2>
+            <div class="todo-form">
+              <input type="text" id="todo-title" placeholder="Todo title" />
+              <textarea id="todo-description" placeholder="Todo description (optional)"></textarea>
+              <select id="todo-priority">
+                <option value="low">Low Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+              </select>
+              <button id="add-todo-btn">Add Todo</button>
+            </div>
+          </div>
+
+          <div class="todos-list">
+            <h2>Your Todos</h2>
+            <div class="filter-controls">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="open">Open</button>
+              <button class="filter-btn" data-filter="closed">Completed</button>
+            </div>
+            <div id="todos-container" class="todos-container">
+              <p class="loading">Loading todos...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
