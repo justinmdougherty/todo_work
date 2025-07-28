@@ -397,32 +397,6 @@ export default function TodoInterface({
                       <option value="high">High Priority</option>
                     </select>
                   </div>
-                  <div className="sidebar-section">
-                    <h4>Selected Labels</h4>
-                    <div className="modal-selected-labels">
-                      {Array.from(selectedLabels).map((labelName) => {
-                        const label = labels.find((l) => l.name === labelName);
-                        const color = label ? label.color : "6366f1";
-
-                        return (
-                          <div
-                            key={labelName}
-                            className="label-tag"
-                            style={{ backgroundColor: `#${color}` }}
-                          >
-                            {labelName}
-                            <button
-                              className="remove-label"
-                              onClick={() => toggleLabel(labelName)}
-                              type="button"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </div>
                 <textarea
                   value={newIssueForm.description}
@@ -453,10 +427,17 @@ export default function TodoInterface({
                             isSelected ? "selected" : ""
                           }`}
                           onClick={() => toggleLabel(label.name)}
-                          style={{
-                            backgroundColor: `#${label.color}`,
-                            color: getContrastColor(label.color),
-                          }}
+                          style={
+                            isSelected
+                              ? {
+                                  backgroundColor: `#${label.color}`,
+                                  color: getContrastColor(label.color),
+                                }
+                              : {
+                                  borderColor: `#${label.color}`,
+                                  color: `#${label.color}`,
+                                }
+                          }
                         >
                           {label.name}
                         </div>
