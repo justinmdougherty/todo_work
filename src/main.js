@@ -40,15 +40,26 @@ class TodoApp {
   }
 
   loadStoredConfig() {
-    const token = localStorage.getItem('github-token')
-    const owner = localStorage.getItem('repo-owner') || 'justinmdougherty'
-    const name = localStorage.getItem('repo-name') || 'todo_work'
+    // Check environment variables first (Vite exposes VITE_ prefixed variables)
+    const envToken = import.meta.env.VITE_GITHUB_TOKEN
+    const envOwner = import.meta.env.VITE_REPO_OWNER
+    const envName = import.meta.env.VITE_REPO_NAME
+    
+    // Fall back to localStorage if no environment variables
+    const token = envToken || localStorage.getItem('github-token')
+    const owner = envOwner || localStorage.getItem('repo-owner') || 'justinmdougherty'
+    const name = envName || localStorage.getItem('repo-name') || 'todo_work'
 
     if (token) {
       document.getElementById('github-token').value = token
     }
     document.getElementById('repo-owner').value = owner
     document.getElementById('repo-name').value = name
+
+    // Show helpful message if using environment variables
+    if (envToken) {
+      this.showStatus('📝 Using GitHub token from environment variables', 'success')
+    }
 
     if (token && owner && name) {
       this.connectToGitHub()

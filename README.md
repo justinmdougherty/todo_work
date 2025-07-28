@@ -42,19 +42,48 @@ A modern web application for managing work todos using GitHub Issues as the back
 
 ### GitHub Configuration
 
-1. **Create a GitHub Personal Access Token**:
+You have two options for setting up your GitHub credentials:
+
+#### Option 1: Environment Variables (Recommended for multiple computers)
+
+1. **Copy the environment file**:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit the .env file** with your actual values:
+   ```env
+   VITE_GITHUB_TOKEN=your_actual_github_token_here
+   VITE_REPO_OWNER=justinmdougherty
+   VITE_REPO_NAME=todo_work
+   ```
+
+3. **Create a GitHub Personal Access Token**:
    - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
    - Click "Generate new token (classic)"
    - Select the following scopes:
      - `repo` (Full control of private repositories)
      - `public_repo` (Access public repositories)
-   - Copy the generated token
+   - Copy the generated token and paste it in your `.env` file
 
-2. **Configure the Application**:
-   - Enter your GitHub token in the app
+4. **Restart the development server** to load the environment variables:
+   ```bash
+   npm run dev
+   ```
+
+The app will automatically connect using your environment variables.
+
+#### Option 2: Manual Entry (Works on any computer)
+
+1. **Create a GitHub Personal Access Token** (same steps as above)
+
+2. **Configure in the app**:
+   - Enter your GitHub token in the app interface
    - Set the repository owner (e.g., `justinmdougherty`)
    - Set the repository name (e.g., `todo_work`)
    - Click "Connect to GitHub"
+
+**Note**: Environment variables take priority over manual entry. If you have both set up, the environment variables will be used.
 
 ## 📱 Usage
 
