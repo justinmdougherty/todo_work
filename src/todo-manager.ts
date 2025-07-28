@@ -49,15 +49,19 @@ export class TodoManager {
     return this.formatTodoForDisplay(issue);
   }
 
-  async viewTodo(todoId: number): Promise<TodoItem> {
-    const issue = await this.github.getIssue(todoId);
-    const repo = this.github.getCurrentRepository();
-    const issueUrl = `https://github.com/${repo.owner}/${repo.repo}/issues/${todoId}`;
-    
-    // Open in new tab
-    window.open(issueUrl, '_blank');
-    
-    return this.formatTodoForDisplay(issue);
+  async viewTodo(todoId: number): Promise<any> {
+    // Get full issue details with comments
+    const issueDetails = await this.github.getIssueWithComments(todoId);
+    return {
+      ...this.formatTodoForDisplay(issueDetails),
+      comments: issueDetails.comments || []
+    };
+  }
+
+  async addCommentToTodo(todoId: number, comment: string): Promise<any> {
+    await this.github.addCommentToIssue(todoId, comment);
+    // Return updated todo with fresh comments
+    return this.viewTodo(todoId);
   }
 
   async updateTodo(todoId: number, updates: any): Promise<TodoItem> {

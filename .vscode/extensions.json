@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ritwickdey.liveserver",
+    "ms-vscode.vscode-json"
+  ]
+}

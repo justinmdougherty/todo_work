@@ -22,6 +22,22 @@ export interface GitHubIssue {
   pull_request?: any; // We filter these out
 }
 
+export interface GitHubComment {
+  id: number;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  html_url: string;
+  user: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
+export interface GitHubIssueDetails extends GitHubIssue {
+  comments?: GitHubComment[];
+}
+
 export interface GitHubLabel {
   name: string;
   color: string;
@@ -32,10 +48,26 @@ export interface TodoItem extends GitHubIssue {
   priority: 'low' | 'medium' | 'high';
 }
 
+export interface TodoItemDetails extends TodoItem {
+  comments?: GitHubComment[];
+}
+
 export interface CreateTodoParams {
   title: string;
   description?: string;
   priority: 'low' | 'medium' | 'high';
+  labels?: string[];
+}
+
+export interface EditTodoForm {
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+}
+
+export interface UpdateTodoParams {
+  title?: string;
+  body?: string;
   labels?: string[];
 }
 

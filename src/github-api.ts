@@ -86,6 +86,29 @@ export class GitHubAPI {
     return this.request<GitHubIssue>(`/repos/${this.owner}/${this.repo}/issues/${issueNumber}`);
   }
 
+  async getIssueComments(issueNumber: number): Promise<any[]> {
+    return this.request<any[]>(`/repos/${this.owner}/${this.repo}/issues/${issueNumber}/comments`);
+  }
+
+  async getIssueWithComments(issueNumber: number): Promise<any> {
+    const [issue, comments] = await Promise.all([
+      this.getIssue(issueNumber),
+      this.getIssueComments(issueNumber)
+    ]);
+    
+    return {
+      ...issue,
+      comments
+    };
+  }
+
+  async addCommentToIssue(issueNumber: number, body: string): Promise<any> {
+    return this.request(`/repos/${this.owner}/${this.repo}/issues/${issueNumber}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ body })
+    });
+  }
+
   async getLabels(): Promise<GitHubLabel[]> {
     return this.request<GitHubLabel[]>(`/repos/${this.owner}/${this.repo}/labels`);
   }

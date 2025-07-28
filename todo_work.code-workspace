@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "statusBarCommands.commands": [
+      {
+        "text": "🚀 Start Dev",
+        "command": "workbench.action.tasks.runTask",
+        "arguments": ["dev"],
+        "tooltip": "Start development server"
+      }
+    ]
+  }
+}

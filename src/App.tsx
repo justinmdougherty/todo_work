@@ -26,6 +26,8 @@ function App() {
 
   const [githubAPI, setGithubAPI] = useState<GitHubAPI | null>(null);
   const [todoManager, setTodoManager] = useState<TodoManager | null>(null);
+  const [viewingTodo, setViewingTodo] = useState<any | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   // Load stored configuration on mount
   useEffect(() => {
@@ -239,12 +241,33 @@ function App() {
     ) => {
       if (!todoManager) return;
 
+      setState((prev) => ({ ...prev, isLoading: true }));
+
       try {
         await todoManager.createTodo(title, description, priority, labels);
+        // Immediately reload todos and reset selected labels
         await loadTodos();
-        setState((prev) => ({ ...prev, selectedLabels: new Set() }));
+        setState((prev) => ({
+          ...prev,
+          selectedLabels: new Set(),
+          isLoading: false,
+          connectionStatus: {
+            message: "✅ Todo created successfully!",
+            type: "success",
+          },
+        }));
       } catch (error) {
         console.error("Failed to create todo:", error);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          connectionStatus: {
+            message: `❌ Failed to create todo: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+            type: "error",
+          },
+        }));
         throw error;
       }
     },
@@ -254,6 +277,8 @@ function App() {
   const updateTodoState = useCallback(
     async (todoId: number, action: "complete" | "reopen" | "delete") => {
       if (!todoManager) return;
+
+      setState((prev) => ({ ...prev, isLoading: true }));
 
       try {
         switch (action) {
@@ -267,9 +292,29 @@ function App() {
             await todoManager.deleteTodo(todoId);
             break;
         }
+
+        // Immediately reload todos
         await loadTodos();
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          connectionStatus: {
+            message: `✅ Todo ${action}d successfully!`,
+            type: "success",
+          },
+        }));
       } catch (error) {
         console.error(`Failed to ${action} todo:`, error);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          connectionStatus: {
+            message: `❌ Failed to ${action} todo: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+            type: "error",
+          },
+        }));
         throw error;
       }
     },
@@ -279,7 +324,26 @@ function App() {
   const viewTodo = useCallback(
     async (todoId: number) => {
       if (!todoManager) return;
-      await todoManager.viewTodo(todoId);
+
+      try {
+        setState((prev) => ({ ...prev, isLoading: true }));
+        const todoDetails = await todoManager.viewTodo(todoId);
+        setViewingTodo(todoDetails);
+        setShowViewModal(true);
+        setState((prev) => ({ ...prev, isLoading: false }));
+      } catch (error) {
+        console.error("Failed to load todo details:", error);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          connectionStatus: {
+            message: `❌ Failed to load todo details: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+            type: "error",
+          },
+        }));
+      }
     },
     [todoManager]
   );
@@ -292,6 +356,89 @@ function App() {
     setState((prev) => ({ ...prev, selectedLabels: labels }));
   }, []);
 
+  const editTodo = useCallback(
+    async (
+      todoId: number,
+      updates: {
+        title: string;
+        description: string;
+        priority: "low" | "medium" | "high";
+        labels: string[];
+      }
+    ) => {
+      if (!todoManager) return;
+
+      setState((prev) => ({ ...prev, isLoading: true }));
+
+      try {
+        // Prepare the update with priority label
+        const priorityLabel = `priority: ${updates.priority}`;
+        const allLabels = [priorityLabel, "todo", ...updates.labels];
+
+        await todoManager.updateTodo(todoId, {
+          title: updates.title,
+          body: updates.description,
+          labels: allLabels,
+        });
+
+        // Immediately reload todos
+        await loadTodos();
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          connectionStatus: {
+            message: "✅ Todo updated successfully!",
+            type: "success",
+          },
+        }));
+      } catch (error) {
+        console.error("Failed to edit todo:", error);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          connectionStatus: {
+            message: `❌ Failed to update todo: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+            type: "error",
+          },
+        }));
+        throw error;
+      }
+    },
+    [todoManager, loadTodos]
+  );
+
+  const addCommentToTodo = useCallback(
+    async (todoId: number, comment: string) => {
+      if (!todoManager) return;
+
+      try {
+        const updatedTodo = await todoManager.addCommentToTodo(todoId, comment);
+        setViewingTodo(updatedTodo);
+        setState((prev) => ({
+          ...prev,
+          connectionStatus: {
+            message: "✅ Comment added successfully!",
+            type: "success",
+          },
+        }));
+      } catch (error) {
+        console.error("Failed to add comment:", error);
+        setState((prev) => ({
+          ...prev,
+          connectionStatus: {
+            message: `❌ Failed to add comment: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+            type: "error",
+          },
+        }));
+        throw error;
+      }
+    },
+    [todoManager]
+  );
   if (!state.isConnected) {
     return (
       <GitHubConfigComponent
@@ -313,13 +460,21 @@ function App() {
       isLoading={state.isLoading}
       config={state.config!}
       connectionStatus={state.connectionStatus}
+      viewingTodo={viewingTodo}
+      showViewModal={showViewModal}
       onCreateTodo={createTodo}
       onUpdateTodo={updateTodoState}
+      onEditTodo={editTodo}
       onViewTodo={viewTodo}
+      onAddComment={addCommentToTodo}
       onSetFilter={setFilter}
       onUpdateSelectedLabels={updateSelectedLabels}
       onSwitchRepository={switchRepository}
       onReloadLabels={() => loadLabels()}
+      onCloseViewModal={() => {
+        setShowViewModal(false);
+        setViewingTodo(null);
+      }}
     />
   );
 }
